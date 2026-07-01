@@ -1,12 +1,19 @@
 import requests
+from bs4 import BeautifulSoup
+
 
 url = "https://www.epra.go.ke/pump-prices"
 
 response = requests.get(url)
 
-with open("epra_fuel_prices.pdf", "wb") as file:
-	file.write(response.content)
+soup = BeautifulSoup(response.text, "html.parser")
+links = soup.find_all("a")
 
-print("Download successful")
-
+for link in links:
+	text = link.get_text(strip=True)
+	href = link.get("href")
+	
+	print(f"Text: {text}")
+	print(f"Link: {href}")
+	print("_________")
 
