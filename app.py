@@ -20,6 +20,20 @@ if table:
         columns = [td.get_text(strip=True) for td in row.find_all("td")]
 
         if columns:
-            print(columns)
+            fuel = {
+       		"From_date" : columns[0],
+        	"To_date" : columns[1],
+        	"town" : columns[2],
+        	"Super" : float(columns[3]),
+        	"Diesel" :float(columns[4]),
+        	"Kerosine" : float(columns[5])
+        }
+        print(fuel)
+
+
 else:
     print("No table found.")
+
+
+
+
