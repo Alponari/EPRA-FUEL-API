@@ -1,5 +1,7 @@
 import requests
+from datetime import datetime
 from bs4 import BeautifulSoup
+from database import save_fuel_price
 
 url = "https://www.epra.go.ke/pump-prices"
 
@@ -9,6 +11,8 @@ response.raise_for_status()
 soup = BeautifulSoup(response.text, "html.parser")
 
 table = soup.find("table")
+
+fuel_prices = []
 
 if table:
     rows = table.find_all("tr")
@@ -21,14 +25,19 @@ if table:
 
         if columns:
             fuel = {
-       		"From_date" : columns[0],
-        	"To_date" : columns[1],
+       		"from_date" : datetime.strptime(columns[0],
+		"%d-%m-%Y").date(),
+        	"to_date" : datetime.strptime(columns[1],
+		"%d-%m-%Y").date(),
         	"town" : columns[2],
-        	"Super" : float(columns[3]),
-        	"Diesel" :float(columns[4]),
-        	"Kerosine" : float(columns[5])
-        }
-        print(fuel)
+        	"super" : float(columns[3]),
+        	"diesel" :float(columns[4]),
+        	"kerosene" : float(columns[5])
+            }
+
+            fuel_prices.append(fuel)
+            save_fuel_price(fuel)
+        print(fuel_prices)
 
 
 else:
