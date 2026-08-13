@@ -41,4 +41,19 @@ def save_fuel_price(fuel):
 	cursor.close()
 	connection.close()
 
+def get_fuel_prices():
+	connection = connect_db()
+	cursor = connection.cursor()
+
+	cursor.execute("""
+		SELECT id, from_date, to_date, town,super, diesel, kerosene
+		FROM fuel_prices
+		ORDER BY id
+	""")
+	rows = cursor.fetchall()
+
+	cursor.close()
+	connection.close()
+
+	return rows
 

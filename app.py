@@ -1,48 +1,33 @@
-import requests
-from datetime import datetime
-from bs4 import BeautifulSoup
-from database import save_fuel_price
+from flask import Flask
+from database import get_fuel_prices
 
-url = "https://www.epra.go.ke/pump-prices"
+app = Flask(__name__)
 
-response = requests.get(url)
-response.raise_for_status()
+@app.route("/")
+def home():
+	return {"message": "EPRA API is running"}
 
-soup = BeautifulSoup(response.text, "html.parser")
+@app.route("/fuel-prices")
+def fuel_price():
+	rows = get_fuel_prices()
 
-table = soup.find("table")
+	prices = []
 
-fuel_prices = []
+	for row in rows:
+		fuel = {
+			"id": row[0],
+			"from_date": str(row[1]),
+			"to_date": str(row[2]),
+			"town": row[3],
+			"super": float(row[4]),
+			"diesel": float(row[5]),
+			"kerosene": float(row[6])
+		}
 
-if table:
-    rows = table.find_all("tr")
-    headers = [th.get_text(strip=True) for th in rows[0].find_all(["th", "td"])]
-    print(headers)
+		prices.append(fuel)
 
-
-    for row in rows[1:]:
-        columns = [td.get_text(strip=True) for td in row.find_all("td")]
-
-        if columns:
-            fuel = {
-       		"from_date" : datetime.strptime(columns[0],
-		"%d-%m-%Y").date(),
-        	"to_date" : datetime.strptime(columns[1],
-		"%d-%m-%Y").date(),
-        	"town" : columns[2],
-        	"super" : float(columns[3]),
-        	"diesel" :float(columns[4]),
-        	"kerosene" : float(columns[5])
-            }
-
-            fuel_prices.append(fuel)
-            save_fuel_price(fuel)
-        print(fuel_prices)
+	return prices
 
 
-else:
-    print("No table found.")
-
-
-
-
+if __name__ == "__main__":
+	app.run(debug=True)
